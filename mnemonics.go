@@ -1,3 +1,21 @@
+// Package mnemonics is a package that converts []byte's into human-friendly
+// phrases, using common words pulled from a dictionary. The dictionary size is
+// 1626, and multiple languages are supported.
+//
+// The primary purpose of this library is creating human-friendly
+// cryptographically secure passwords. A cryptographically secure password
+// needs to contain between 128 and 256 bits of entropy. Humans are typically
+// incapable of generating sufficiently secure passwords without a random
+// number generator, and 256-bit random numbers tend to difficult to memorize
+// and even to write down (a single mistake in the writing, or even a single
+// somewhat sloppy character can render the backup useless).
+//
+// By using a small set of common words instead of random numbers, copying
+// errors are more easily spotted and memorization is also easier, without
+// sacrificing password strength.
+//
+// The mnemonics package does not have any functions for actually generating
+// entropy, it just converts existing entropy into human-friendly phrases.
 package mnemonics
 
 import (
@@ -15,15 +33,15 @@ const (
 )
 
 var (
-	errEmptyInput      = errors.New("input has len 0 - not valid for conversion")
-	errUnknownLanguage = errors.New("language not recognized")
-	errUnknownWord     = errors.New("word not found in dictionary for given language")
+	errEmptyInput        = errors.New("input has len 0 - not valid for conversion")
+	errUnknownDictionary = errors.New("language not recognized")
+	errUnknownWord       = errors.New("word not found in dictionary for given language")
 )
 
 type (
-	// Language is a type-safe identifier that indicates which dictionary
+	// DictionaryID is a type-safe identifier that indicates which dictionary
 	// should be used.
-	Language string
+	DictionaryID string
 
 	// Dictionary is a DictionarySize list of words which can be used to create
 	// human-friendly entropy.
@@ -34,6 +52,25 @@ type (
 	Phrase []string
 )
 
+// The conversion functions can be seen as changing the base of a number. A
+// []byte can actually be viewed as a slice of base-256 numbers, and a []dict
+// can be viewed as a slice of base-1626 numbers. The conversions are a little
+// strange because leading 0's need to be preserved.
+//
+// For example, in base 256:
+//
+//		{0} -> 0
+//		{255} -> 255
+//		{0, 0} -> 256
+//		{1, 0} -> 257
+//		{0, 1} -> 512
+//
+// Every possible []byte has a unique big.Int which represents it, and every
+// big.Int represents a unique []byte.
+
+// bytesToInt converts a byte slice to a big.Int in a way that preserves
+// leading 0s, and ensures there is a perfect 1:1 mapping between Int's and
+// []byte's.
 func bytesToInt(bs []byte) *big.Int {
 	base := big.NewInt(256)
 	exp := big.NewInt(1)
@@ -48,6 +85,8 @@ func bytesToInt(bs []byte) *big.Int {
 	return result
 }
 
+// intToBytes conversts a big.Int to a []byte, following the conventions
+// documented at bytesToInt.
 func intToBytes(bi *big.Int) (bs []byte) {
 	base := big.NewInt(256)
 	for bi.Cmp(base) >= 0 {
@@ -60,37 +99,18 @@ func intToBytes(bi *big.Int) (bs []byte) {
 	return bs
 }
 
-func intToPhrase(bi *big.Int, l Language) (p Phrase, err error) {
-	// Determine which dictionary to use based on the input language.
-	var dict Dictionary
-	switch {
-	case l == English:
-		dict = englishDictionary
-	default:
-		return nil, errUnknownLanguage
-	}
-
-	base := big.NewInt(DictionarySize)
-	for bi.Cmp(base) >= 0 {
-		i := new(big.Int).Mod(bi, base).Int64()
-		p = append(p, dict[i])
-		bi.Sub(bi, base)
-		bi.Div(bi, base)
-	}
-	p = append(p, dict[bi.Int64()])
-	return p, nil
-}
-
-func phraseToInt(p Phrase, l Language) (*big.Int, error) {
+// phraseToInt coverts a phrase into a big.Int, using logic similar to
+// bytesToInt.
+func phraseToInt(p Phrase, did DictionaryID) (*big.Int, error) {
 	// Determine which dictionary to use based on the input language.
 	var dict Dictionary
 	var prefixLen int
 	switch {
-	case l == English:
+	case did == English:
 		dict = englishDictionary
 		prefixLen = EnglishUniquePrefix
 	default:
-		return nil, errUnknownLanguage
+		return nil, errUnknownDictionary
 	}
 
 	base := big.NewInt(1626)
@@ -120,22 +140,45 @@ func phraseToInt(p Phrase, l Language) (*big.Int, error) {
 	return result, nil
 }
 
+// intToPhrase converts a phrase into a big.Int, working in a fashion similar
+// to bytesToInt.
+func intToPhrase(bi *big.Int, did DictionaryID) (p Phrase, err error) {
+	// Determine which dictionary to use based on the input language.
+	var dict Dictionary
+	switch {
+	case did == English:
+		dict = englishDictionary
+	default:
+		return nil, errUnknownDictionary
+	}
+
+	base := big.NewInt(DictionarySize)
+	for bi.Cmp(base) >= 0 {
+		i := new(big.Int).Mod(bi, base).Int64()
+		p = append(p, dict[i])
+		bi.Sub(bi, base)
+		bi.Div(bi, base)
+	}
+	p = append(p, dict[bi.Int64()])
+	return p, nil
+}
+
 // ToPhrase converts an input []byte to a human-friendly phrase. The conversion
 // is reversible.
-func ToPhrase(entropy []byte, l Language) (Phrase, error) {
+func ToPhrase(entropy []byte, did DictionaryID) (Phrase, error) {
 	if len(entropy) == 0 {
 		return nil, errEmptyInput
 	}
 	intEntropy := bytesToInt(entropy)
-	return intToPhrase(intEntropy, l)
+	return intToPhrase(intEntropy, did)
 }
 
 // FromPhrase converts an input phrase back to the original []byte.
-func FromPhrase(p Phrase, l Language) ([]byte, error) {
+func FromPhrase(p Phrase, did DictionaryID) ([]byte, error) {
 	if len(p) == 0 {
 		return nil, errEmptyInput
 	}
-	intEntropy, err := phraseToInt(p, l)
+	intEntropy, err := phraseToInt(p, did)
 	if err != nil {
 		return nil, err
 	}

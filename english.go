@@ -34,7 +34,7 @@ package mnemonics
 const (
 	// English refers to the english dictionary, which contains a set of common
 	// english words.
-	English Language = "english"
+	English DictionaryID = "english"
 
 	// EnglishUniquePrefix indicates the number of letters needed to achieve
 	// unique prefixes throughout the english dictionary. No two words in the
