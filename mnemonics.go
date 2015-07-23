@@ -21,9 +21,17 @@ var (
 )
 
 type (
-	Language   string
+	// Language is a type-safe identifier that indicates which dictionary
+	// should be used.
+	Language string
+
+	// Dictionary is a DictionarySize list of words which can be used to create
+	// human-friendly entropy.
 	Dictionary [DictionarySize]string
-	Phrase     []string
+
+	// Phrase is the human readable version of a random []byte. Most typically,
+	// a phrase is displayed to the user using the String method.
+	Phrase []string
 )
 
 func bytesToInt(bs []byte) *big.Int {
@@ -48,6 +56,7 @@ func intToBytes(bi *big.Int) (bs []byte) {
 		bi.Sub(bi, base)
 		bi.Div(bi, base)
 	}
+	bs = append(bs, byte(bi.Int64()))
 	return bs
 }
 
@@ -91,9 +100,9 @@ func phraseToInt(p Phrase, l Language) (*big.Int, error) {
 		// Find the index associated with the phrase.
 		var tmp *big.Int
 		found := false
-		for i, word := range dict {
+		for j, word := range dict {
 			if strings.HasPrefix(word, p[i][:prefixLen]) {
-				tmp = big.NewInt(int64(i))
+				tmp = big.NewInt(int64(j))
 				found = true
 				break
 			}
@@ -111,6 +120,8 @@ func phraseToInt(p Phrase, l Language) (*big.Int, error) {
 	return result, nil
 }
 
+// ToPhrase converts an input []byte to a human-friendly phrase. The conversion
+// is reversible.
 func ToPhrase(entropy []byte, l Language) (Phrase, error) {
 	if len(entropy) == 0 {
 		return nil, errEmptyInput
@@ -119,6 +130,7 @@ func ToPhrase(entropy []byte, l Language) (Phrase, error) {
 	return intToPhrase(intEntropy, l)
 }
 
+// FromPhrase converts an input phrase back to the original []byte.
 func FromPhrase(p Phrase, l Language) ([]byte, error) {
 	if len(p) == 0 {
 		return nil, errEmptyInput
@@ -127,9 +139,12 @@ func FromPhrase(p Phrase, l Language) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	println(intEntropy.Int64())
 	return intToBytes(intEntropy), nil
 }
 
+// String combines a phrase into a single string by concatenating the
+// individual words with space separation.
 func (p Phrase) String() string {
 	return strings.Join(p, " ")
 }

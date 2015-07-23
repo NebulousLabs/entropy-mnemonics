@@ -18,7 +18,7 @@ func TestEnglishDictionary(t *testing.T) {
 	engMap := make(map[string]struct{})
 	for i, word := range englishDictionary {
 		if len(word) < EnglishUniquePrefix {
-			t.Error("found a short word at index", i)
+			t.Fatal("found a short word at index", i)
 		}
 
 		_, exists := engMap[word[:3]]
