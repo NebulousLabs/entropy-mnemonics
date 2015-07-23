@@ -28,6 +28,8 @@ import (
 	"math/big"
 	"strings"
 	"unicode/utf8"
+
+	"golang.org/x/text/unicode/norm"
 )
 
 const (
@@ -126,6 +128,9 @@ func phraseToInt(p Phrase, did DictionaryID) (*big.Int, error) {
 	exp := big.NewInt(1)
 	result := big.NewInt(-1)
 	for _, word := range p {
+		// Normalize the input.
+		word = norm.NFC.String(word)
+
 		// Get the first prefixLen runes from the string.
 		var prefix []byte
 		var runeCount int
@@ -203,6 +208,7 @@ func FromPhrase(p Phrase, did DictionaryID) ([]byte, error) {
 	if len(p) == 0 {
 		return nil, errEmptyInput
 	}
+
 	intEntropy, err := phraseToInt(p, did)
 	if err != nil {
 		return nil, err

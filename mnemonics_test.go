@@ -388,3 +388,37 @@ func TestIntegrationPhraseString(t *testing.T) {
 		t.Error("Phrase.String() behaving unexpectedly")
 	}
 }
+
+// TestIntegrationNormalization tries to decode a non-normalized string.
+func TestIntegrationNormalization(t *testing.T) {
+	a := Phrase{"abhärten"}
+	b := Phrase{"abh\u00e4rten"}
+	c := Phrase{"abha\u0308rten"}
+	d := Phrase{"abh\u0061\u0308rten"}
+
+	ba, err := FromPhrase(a, German)
+	if err != nil {
+		t.Error(err)
+	}
+	bb, err := FromPhrase(b, German)
+	if err != nil {
+		t.Error(err)
+	}
+	bc, err := FromPhrase(c, German)
+	if err != nil {
+		t.Error(err)
+	}
+	bd, err := FromPhrase(d, German)
+	if err != nil {
+		t.Error(err)
+	}
+	if bytes.Compare(ba, bb) != 0 {
+		t.Error("bad decoding")
+	}
+	if bytes.Compare(bb, bc) != 0 {
+		t.Error("bad decoding")
+	}
+	if bytes.Compare(bc, bd) != 0 {
+		t.Error("bad decoding")
+	}
+}
