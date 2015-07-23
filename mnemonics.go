@@ -7,19 +7,23 @@ import (
 )
 
 const (
+	// DictionarySize specifies the size of the dictionaries that are used by
+	// the mnemonics package. All dictionaries are the same length so that the
+	// same []byte can be encoded into multiple languages and all results will
+	// resemble eachother.
 	DictionarySize = 1626
 )
 
 var (
-	errEmptyInput = errors.New("input has len 0 - not valid for conversion")
+	errEmptyInput      = errors.New("input has len 0 - not valid for conversion")
 	errUnknownLanguage = errors.New("language not recognized")
-	errUnknownWord = errors.New("word not found in dictionary for given language")
+	errUnknownWord     = errors.New("word not found in dictionary for given language")
 )
 
 type (
-	Language string
+	Language   string
 	Dictionary [DictionarySize]string
-	Phrase []string
+	Phrase     []string
 )
 
 func bytesToInt(bs []byte) *big.Int {
