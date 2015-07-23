@@ -32,10 +32,14 @@ package mnemonics
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const (
-	// The English dictionary contains a set of common english words where no
-	// two words have the same 3 letter prefix.
-	English             Language = "english"
-	EnglishUniquePrefix          = 3
+	// English refers to the english dictionary, which contains a set of common
+	// english words.
+	English Language = "english"
+
+	// EnglishUniquePrefix indicates the number of letters needed to achieve
+	// unique prefixes throughout the english dictionary. No two words in the
+	// dictionary have the same prefix of len EnglishUniquePrefix.
+	EnglishUniquePrefix = 3
 )
 
 var (

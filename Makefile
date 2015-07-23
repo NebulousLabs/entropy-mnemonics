@@ -20,8 +20,8 @@ vet:
 test: fmt lint vet
 	go test ./...
 
-cover: test
-	go test -covermode=atomic -coverprofile=cover.out . \
+cover: fmt lint vet
+	@go test -covermode=atomic -coverprofile=cover.out . \
 	&& go tool cover -html=cover.out -o=cover.html \
 	&& rm cover.out
 
