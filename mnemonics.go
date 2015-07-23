@@ -22,6 +22,7 @@ import (
 	"errors"
 	"math/big"
 	"strings"
+	"unicode/utf8"
 )
 
 const (
@@ -108,7 +109,10 @@ func phraseToInt(p Phrase, did DictionaryID) (*big.Int, error) {
 	switch {
 	case did == English:
 		dict = englishDictionary
-		prefixLen = EnglishUniquePrefix
+		prefixLen = EnglishUniquePrefixLen
+	case did == German:
+		dict = germanDictionary
+		prefixLen = GermanUniquePrefixLen
 	default:
 		return nil, errUnknownDictionary
 	}
@@ -116,12 +120,26 @@ func phraseToInt(p Phrase, did DictionaryID) (*big.Int, error) {
 	base := big.NewInt(1626)
 	exp := big.NewInt(1)
 	result := big.NewInt(-1)
-	for i := 0; i < len(p); i++ {
+	for _, word := range p {
+		// Get the first prefixLen runes from the string.
+		var prefix []byte
+		var runeCount int
+		for _, r := range word {
+			encR := make([]byte, utf8.RuneLen(r))
+			utf8.EncodeRune(encR, r)
+			prefix = append(prefix, encR...)
+
+			runeCount++
+			if runeCount == prefixLen {
+				break
+			}
+		}
+
 		// Find the index associated with the phrase.
 		var tmp *big.Int
 		found := false
 		for j, word := range dict {
-			if strings.HasPrefix(word, p[i][:prefixLen]) {
+			if strings.HasPrefix(word, string(prefix)) {
 				tmp = big.NewInt(int64(j))
 				found = true
 				break
@@ -148,6 +166,8 @@ func intToPhrase(bi *big.Int, did DictionaryID) (p Phrase, err error) {
 	switch {
 	case did == English:
 		dict = englishDictionary
+	case did == German:
+		dict = germanDictionary
 	default:
 		return nil, errUnknownDictionary
 	}
@@ -182,7 +202,6 @@ func FromPhrase(p Phrase, did DictionaryID) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	println(intEntropy.Int64())
 	return intToBytes(intEntropy), nil
 }
 

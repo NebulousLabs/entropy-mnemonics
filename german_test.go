@@ -7,20 +7,20 @@ import (
 	"unicode/utf8"
 )
 
-// TestEnglishDictionary checks that the english dictionary is well formed.
-func TestEnglishDictionary(t *testing.T) {
+// TestGermanDictionary checks that the german dictionary is well formed.
+func TestGermanDictionary(t *testing.T) {
 	// Check for sane constants.
-	if English != "english" {
-		t.Error("unexpected identifier for english dictionary")
+	if German != "german" {
+		t.Error("unexpected identifier for german dictionary")
 	}
-	if EnglishUniquePrefixLen != 3 {
-		t.Error("unexpected prefix len for english dictionary")
+	if GermanUniquePrefixLen != 4 {
+		t.Error("unexpected prefix len for german dictionary")
 	}
 
 	// Check that the dictionary has well formed elements, and no repeats.
-	engMap := make(map[string]struct{})
-	for i, word := range englishDictionary {
-		if utf8.RuneCountInString(word) < EnglishUniquePrefixLen {
+	gerMap := make(map[string]struct{})
+	for i, word := range germanDictionary {
+		if utf8.RuneCountInString(word) < GermanUniquePrefixLen {
 			t.Fatal("found a short word at index", i, word)
 		}
 
@@ -32,20 +32,20 @@ func TestEnglishDictionary(t *testing.T) {
 			prefix = append(prefix, encR...)
 
 			runeCount++
-			if runeCount == EnglishUniquePrefixLen {
+			if runeCount == GermanUniquePrefixLen {
 				break
 			}
 		}
 
 		str := string(prefix)
-		_, exists := engMap[str]
+		_, exists := gerMap[str]
 		if exists {
 			t.Error("found a prefix conflict at index", i, word)
 		}
-		engMap[str] = struct{}{}
+		gerMap[str] = struct{}{}
 	}
 
-	// Do some conversions with the english dictionary.
+	// Do some conversions with the german dictionary.
 	for i := 1; i <= 32; i++ {
 		for j := 0; j < 5; j++ {
 			entropy := make([]byte, i)
@@ -54,16 +54,16 @@ func TestEnglishDictionary(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			phrase, err := ToPhrase(entropy, English)
+			phrase, err := ToPhrase(entropy, German)
 			if err != nil {
 				t.Fatal(err)
 			}
-			check, err := FromPhrase(phrase, English)
+			check, err := FromPhrase(phrase, German)
 			if err != nil {
 				t.Fatal(err)
 			}
 			if bytes.Compare(entropy, check) != 0 {
-				t.Error("conversion check failed for the english dictionary")
+				t.Error("conversion check failed for the german dictionary")
 			}
 		}
 	}

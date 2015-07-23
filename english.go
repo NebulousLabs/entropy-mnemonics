@@ -32,14 +32,14 @@ package mnemonics
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const (
-	// English refers to the english dictionary, which contains a set of common
-	// english words.
+	// English is an id pointing to the standard password dictionary for
+	// english users.
 	English DictionaryID = "english"
 
-	// EnglishUniquePrefix indicates the number of letters needed to achieve
+	// EnglishUniquePrefixLen indicates the number of letters needed to achieve
 	// unique prefixes throughout the english dictionary. No two words in the
-	// dictionary have the same prefix of len EnglishUniquePrefix.
-	EnglishUniquePrefix = 3
+	// dictionary have the same prefix of len EnglishUniquePrefixLen.
+	EnglishUniquePrefixLen = 3
 )
 
 var (
