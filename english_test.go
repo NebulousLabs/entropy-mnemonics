@@ -5,6 +5,8 @@ import (
 	"crypto/rand"
 	"testing"
 	"unicode/utf8"
+
+	"golang.org/x/text/unicode/norm"
 )
 
 // TestIntegrationEnglishDictionary checks that the english dictionary is well formed.
@@ -19,10 +21,16 @@ func TestIntegrationEnglishDictionary(t *testing.T) {
 
 	// Check that the dictionary has well formed elements, and no repeats.
 	engMap := make(map[string]struct{})
-	for i, word := range englishDictionary {
+	for _, word := range englishDictionary {
 		// Check that the word is long enough.
 		if utf8.RuneCountInString(word) < EnglishUniquePrefixLen {
-			t.Fatal("found a short word at index", i, word)
+			t.Fatal("found a short word:", word)
+		}
+
+		// Check that the word is normalized.
+		newWord := norm.NFC.String(word)
+		if newWord != word {
+			t.Error("found a non-normalized word:", word)
 		}
 
 		// Fetch the prefix, composed of the first EnglishUniquePrefixLen
@@ -44,7 +52,7 @@ func TestIntegrationEnglishDictionary(t *testing.T) {
 		str := string(prefix)
 		_, exists := engMap[str]
 		if exists {
-			t.Error("found a prefix conflict at index", i, word)
+			t.Error("found a prefix conflict:", word)
 		}
 		engMap[str] = struct{}{}
 	}

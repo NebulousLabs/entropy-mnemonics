@@ -5,6 +5,8 @@ import (
 	"crypto/rand"
 	"testing"
 	"unicode/utf8"
+
+	"golang.org/x/text/unicode/norm"
 )
 
 // TestIntegrationGermanDictionary checks that the german dictionary is well formed.
@@ -19,10 +21,16 @@ func TestIntegrationGermanDictionary(t *testing.T) {
 
 	// Check that the dictionary has well formed elements, and no repeats.
 	gerMap := make(map[string]struct{})
-	for i, word := range germanDictionary {
+	for _, word := range germanDictionary {
 		// Check that the word is long enough.
 		if utf8.RuneCountInString(word) < GermanUniquePrefixLen {
-			t.Fatal("found a short word at index", i, word)
+			t.Fatal("found a short word:", word)
+		}
+
+		// Check that the word is normalized.
+		newWord := norm.NFC.String(word)
+		if newWord != word {
+			t.Error("found a non-normalized word:", word)
 		}
 
 		// Fetch the prefix, composed of the first GermanUniquePrefixLen runes.
@@ -43,7 +51,7 @@ func TestIntegrationGermanDictionary(t *testing.T) {
 		str := string(prefix)
 		_, exists := gerMap[str]
 		if exists {
-			t.Error("found a prefix conflict at index", i, word)
+			t.Error("found a prefix conflict:", word)
 		}
 		gerMap[str] = struct{}{}
 	}
