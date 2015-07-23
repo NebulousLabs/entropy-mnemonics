@@ -1,25 +1,38 @@
 # entropy-mnemonics
 
-mnemonics is a golang package that converts []byte's into human-friendly
-phrases, using common words pulled from a dictionary. The dictionary size is
-1626, and multiple languages are supported.  Each dictionary supports modified
-phrases. Only the first few characters of each word are important. These
-characters form a unique prefix. For example, in the English dictionary, the
-unique prefix len (EnglishUniquePrefixLen) is 3, which means the word 'abbey'
-could be replaced with the word 'abbot', and the program would still run as
-expected.
+mnemonics is a golang package that converts byte slices into human-friendly
+phrases. The primary purpose is to assist with the generation of
+cryptographically secure passwords. The threshold for a cryptographically
+secure password is between 128 and 256 bits, which when converted to base64 is
+22-43 random characters. Random characters are both difficult to remember and
+subject to error when being written down - smudging or sloppy handwriting can
+make it difficult to recover a password.
 
-The primary purpose of this library is creating human-friendly
-cryptographically secure passwords. A cryptographically secure password
-needs to contain between 128 and 256 bits of entropy. Humans are typically
-incapable of generating sufficiently secure passwords without a random
-number generator, and 256-bit random numbers tend to difficult to memorize
-and even to write down (a single mistake in the writing, or even a single
-somewhat sloppy character can render the backup useless).
+mnemonics solves these problems by converting byte slices into simple and
+common words. Take the following 128 bit example:
 
-By using a small set of common words instead of random numbers, copying
-errors are more easily spotted and memorization is also easier, without
-sacrificing password strength.
+```
+Hex:      a26a4821e36c7f7dccaa5484c080cefa
+Base64:   ompIIeNsf33MqlSEwIDO+g==
+Mnemonic: austere sniff aching hiding pact damp focus tacit timber pram left wonders
+```
 
-The mnemonics package does not have any functions for actually generating
-entropy, it just converts existing entropy into human-friendly phrases.
+Though more verbose, the mnemonic phrase is less prone to errors when being
+handled by humans.
+
+The words are chosen from a dictionary of size 1626. (12 words is almost
+exactly 128 bits of entropy). Each dictionary features a unique prefix length,
+meaning all words in the dictionary have a prefix of length 'n' that is unique.
+When decoding a passphrase, only the prefixes are checked. For the English
+dictionary, the unique prefix length is 3. This means that passphrases can be
+altered to make them more understandable or more easily memorized. For example,
+the phrase "austere sniff aching" could safely be changed to "austere sniff
+achoo" and the phrase would still decode correctly.
+
+Full UTF-8 support is available for dictionaries, including input normalization
+for inputs with (canonical equivalence)[https://en.wikipedia.org/wiki/Unicode_equivalence].
+
+Supported Dictionaries:
+
++ English, Prefix Size 3
++ German,  Prefix Size 4
