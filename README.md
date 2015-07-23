@@ -2,7 +2,12 @@
 
 mnemonics is a golang package that converts []byte's into human-friendly
 phrases, using common words pulled from a dictionary. The dictionary size is
-1626, and multiple languages are supported.
+1626, and multiple languages are supported.  Each dictionary supports modified
+phrases. Only the first few characters of each word are important. These
+characters form a unique prefix. For example, in the English dictionary, the
+unique prefix len (EnglishUniquePrefixLen) is 3, which means the word 'abbey'
+could be replaced with the word 'abbot', and the program would still run as
+expected.
 
 The primary purpose of this library is creating human-friendly
 cryptographically secure passwords. A cryptographically secure password
