@@ -7,8 +7,8 @@ import (
 	"unicode/utf8"
 )
 
-// TestEnglishDictionary checks that the english dictionary is well formed.
-func TestEnglishDictionary(t *testing.T) {
+// TestIntegrationEnglishDictionary checks that the english dictionary is well formed.
+func TestIntegrationEnglishDictionary(t *testing.T) {
 	// Check for sane constants.
 	if English != "english" {
 		t.Error("unexpected identifier for english dictionary")
@@ -20,10 +20,13 @@ func TestEnglishDictionary(t *testing.T) {
 	// Check that the dictionary has well formed elements, and no repeats.
 	engMap := make(map[string]struct{})
 	for i, word := range englishDictionary {
+		// Check that the word is long enough.
 		if utf8.RuneCountInString(word) < EnglishUniquePrefixLen {
 			t.Fatal("found a short word at index", i, word)
 		}
 
+		// Fetch the prefix, composed of the first EnglishUniquePrefixLen
+		// runes.
 		var prefix []byte
 		var runeCount int
 		for _, r := range word {
@@ -37,6 +40,7 @@ func TestEnglishDictionary(t *testing.T) {
 			}
 		}
 
+		// Check that the prefix is unique.
 		str := string(prefix)
 		_, exists := engMap[str]
 		if exists {
@@ -53,7 +57,6 @@ func TestEnglishDictionary(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-
 			phrase, err := ToPhrase(entropy, English)
 			if err != nil {
 				t.Fatal(err)
@@ -66,5 +69,17 @@ func TestEnglishDictionary(t *testing.T) {
 				t.Error("conversion check failed for the english dictionary")
 			}
 		}
+	}
+
+	// Check that words in a phrase can be altered according to the prefix
+	// rule.
+	entropy := []byte{1, 2, 3, 4}
+	phrase := Phrase{"chladsf", "syr", "afiezzz"}
+	check, err := FromPhrase(phrase, English)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Compare(entropy, check) != 0 {
+		t.Error("phrase substitution failed")
 	}
 }

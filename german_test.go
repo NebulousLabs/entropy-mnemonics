@@ -7,8 +7,8 @@ import (
 	"unicode/utf8"
 )
 
-// TestGermanDictionary checks that the german dictionary is well formed.
-func TestGermanDictionary(t *testing.T) {
+// TestIntegrationGermanDictionary checks that the german dictionary is well formed.
+func TestIntegrationGermanDictionary(t *testing.T) {
 	// Check for sane constants.
 	if German != "german" {
 		t.Error("unexpected identifier for german dictionary")
@@ -20,10 +20,12 @@ func TestGermanDictionary(t *testing.T) {
 	// Check that the dictionary has well formed elements, and no repeats.
 	gerMap := make(map[string]struct{})
 	for i, word := range germanDictionary {
+		// Check that the word is long enough.
 		if utf8.RuneCountInString(word) < GermanUniquePrefixLen {
 			t.Fatal("found a short word at index", i, word)
 		}
 
+		// Fetch the prefix, composed of the first GermanUniquePrefixLen runes.
 		var prefix []byte
 		var runeCount int
 		for _, r := range word {
@@ -37,6 +39,7 @@ func TestGermanDictionary(t *testing.T) {
 			}
 		}
 
+		// Check that the prefix is unique.
 		str := string(prefix)
 		_, exists := gerMap[str]
 		if exists {
@@ -53,7 +56,6 @@ func TestGermanDictionary(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-
 			phrase, err := ToPhrase(entropy, German)
 			if err != nil {
 				t.Fatal(err)
@@ -66,5 +68,17 @@ func TestGermanDictionary(t *testing.T) {
 				t.Error("conversion check failed for the german dictionary")
 			}
 		}
+	}
+
+	// Check that words in a phrase can be altered according to the prefix
+	// rule.
+	entropy := []byte{1, 2, 3, 4}
+	phrase := Phrase{"bete", "Rieglfffffzzzz", "Abundans"}
+	check, err := FromPhrase(phrase, German)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Compare(entropy, check) != 0 {
+		t.Error("phrase substitution failed")
 	}
 }

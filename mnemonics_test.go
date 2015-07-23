@@ -336,3 +336,55 @@ func TestIntegrationConversions(t *testing.T) {
 		}
 	}
 }
+
+// TestIntegrationNilInputs tries nil and 0 inputs when using the exported
+// functions.
+func TestIntegrationNilInputs(t *testing.T) {
+	_, err := ToPhrase(nil, English)
+	if err != errEmptyInput {
+		t.Error(err)
+	}
+	_, err = FromPhrase(nil, English)
+	if err != errEmptyInput {
+		t.Error(err)
+	}
+	_, err = ToPhrase([]byte{0}, "")
+	if err != errUnknownDictionary {
+		t.Error(err)
+	}
+	_, err = FromPhrase(Phrase{"abbey"}, "")
+	if err != errUnknownDictionary {
+		t.Error(err)
+	}
+
+	ps := Phrase{}.String()
+	if ps != "" {
+		t.Error(ps)
+	}
+	ps = Phrase{""}.String()
+	if ps != "" {
+		t.Error(ps)
+	}
+	ps = Phrase{"a", ""}.String()
+	if ps != "a " {
+		t.Error(ps)
+	}
+}
+
+// TestIntegrationUnrecognizedWord tries to decode a phrase that has an
+// unrecognized word.
+func TestIntegrationUnrecognizedWord(t *testing.T) {
+	phrase := Phrase{"zzzzzz"}
+	_, err := FromPhrase(phrase, English)
+	if err != errUnknownWord {
+		t.Error(err)
+	}
+}
+
+// TestIntegrationPhraseString calls String() on a Phrase.
+func TestIntegrationPhraseString(t *testing.T) {
+	phrase := Phrase{"abc", "def", "g"}
+	if phrase.String() != "abc def g" {
+		t.Error("Phrase.String() behaving unexpectedly")
+	}
+}
