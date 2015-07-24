@@ -37,3 +37,4 @@ for inputs with [canonical equivalence](https://en.wikipedia.org/wiki/Unicode_eq
 
 + English (prefix size: 3)
 + German (prefix size: 4)
++ Japanese (prefix size: 3)

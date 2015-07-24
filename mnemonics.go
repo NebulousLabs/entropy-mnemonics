@@ -120,6 +120,9 @@ func phraseToInt(p Phrase, did DictionaryID) (*big.Int, error) {
 	case did == German:
 		dict = germanDictionary
 		prefixLen = GermanUniquePrefixLen
+	case did == Japanese:
+		dict = japaneseDictionary
+		prefixLen = JapaneseUniquePrefixLen
 	default:
 		return nil, errUnknownDictionary
 	}
@@ -178,6 +181,8 @@ func intToPhrase(bi *big.Int, did DictionaryID) (p Phrase, err error) {
 		dict = englishDictionary
 	case did == German:
 		dict = germanDictionary
+	case did == Japanese:
+		dict = japaneseDictionary
 	default:
 		return nil, errUnknownDictionary
 	}
