@@ -9,8 +9,8 @@ import (
 	"golang.org/x/text/unicode/norm"
 )
 
-// TestIntegrationGermanDictionary checks that the german dictionary is well formed.
-func TestIntegrationGermanDictionary(t *testing.T) {
+// TestGermanDictionary checks that the german dictionary is well formed.
+func TestGermanDictionary(t *testing.T) {
 	// Check for sane constants.
 	if German != "german" {
 		t.Error("unexpected identifier for german dictionary")
