@@ -9,9 +9,9 @@ import (
 	"golang.org/x/text/unicode/norm"
 )
 
-// TestIntegrationJapaneseDictionary checks that the japanese dictionary is
+// TestJapaneseDictionary checks that the japanese dictionary is
 // well formed.
-func TestIntegrationJapanesesDictionary(t *testing.T) {
+func TestJapanesesDictionary(t *testing.T) {
 	// Check for sane constants.
 	if Japanese != "japanese" {
 		t.Error("unexpected identifier for japanese dictionary")

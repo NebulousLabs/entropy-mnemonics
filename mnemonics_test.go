@@ -2,114 +2,11 @@ package mnemonics
 
 import (
 	"bytes"
-	"math/big"
 	"testing"
 )
 
-// TestUnitBytesToInt probes the bytesToInt function.
-func TestUnitBytesToInt(t *testing.T) {
-	// Try for value {0}.
-	expected := big.NewInt(0)
-	result := bytesToInt([]byte{0})
-	if expected.Cmp(result) != 0 {
-		t.Error("failure for '0' value")
-	}
-
-	// Try for value {1}.
-	expected = big.NewInt(1)
-	result = bytesToInt([]byte{1})
-	if expected.Cmp(result) != 0 {
-		t.Error("failure for '1' value")
-	}
-
-	// Try for value {255}.
-	expected = big.NewInt(255)
-	result = bytesToInt([]byte{255})
-	if expected.Cmp(result) != 0 {
-		t.Error("failure for '255' value")
-	}
-
-	// Try for value {0, 0}.
-	expected = big.NewInt(256)
-	result = bytesToInt([]byte{0, 0})
-	if expected.Cmp(result) != 0 {
-		t.Error("failure for '256' value")
-	}
-
-	// Try for value {1, 0}.
-	expected = big.NewInt(257)
-	result = bytesToInt([]byte{1, 0})
-	if expected.Cmp(result) != 0 {
-		t.Error("failure for '257' value")
-	}
-
-	// Try for value {0, 1}.
-	expected = big.NewInt(512)
-	result = bytesToInt([]byte{0, 1})
-	if expected.Cmp(result) != 0 {
-		t.Error("failure for '512' value")
-	}
-
-	// Try for value {1, 1}.
-	expected = big.NewInt(513)
-	result = bytesToInt([]byte{1, 1})
-	if expected.Cmp(result) != 0 {
-		t.Error("failure for '513' value")
-	}
-
-	// Try for value {2, 1}.
-	expected = big.NewInt(514)
-	result = bytesToInt([]byte{2, 1})
-	if expected.Cmp(result) != 0 {
-		t.Error("failure for '514' value")
-	}
-
-	// Try for value {2, 2}.
-	expected = big.NewInt(770)
-	result = bytesToInt([]byte{2, 2})
-	if expected.Cmp(result) != 0 {
-		t.Error("failure for '770' value")
-	}
-
-	// Try for value {0, 255}.
-	expected = big.NewInt(65536)
-	result = bytesToInt([]byte{0, 255})
-	if expected.Cmp(result) != 0 {
-		t.Error("failure for '65536' value")
-	}
-
-	// Try for value {0, 0, 0}.
-	expected = big.NewInt(65792)
-	result = bytesToInt([]byte{0, 0, 0})
-	if expected.Cmp(result) != 0 {
-		t.Error("failure for '65792' value")
-	}
-
-	// Try for value {1, 0, 0}.
-	expected = big.NewInt(65793)
-	result = bytesToInt([]byte{1, 0, 0})
-	if expected.Cmp(result) != 0 {
-		t.Error("failure for '65793' value")
-	}
-
-	// Try for value {0, 1, 0}.
-	expected = big.NewInt(66048)
-	result = bytesToInt([]byte{0, 1, 0})
-	if expected.Cmp(result) != 0 {
-		t.Error("failure for '66048' value")
-	}
-
-	// Try for value {0, 0, 1}.
-	expected = big.NewInt(131328)
-	result = bytesToInt([]byte{0, 0, 1})
-	if expected.Cmp(result) != 0 {
-		t.Error("failure for '131328' value")
-	}
-}
-
-// TestIntegrationConversions checks ToPhrase and FromPhrase for consistency
-// and sanity.
-func TestIntegrationConversions(t *testing.T) {
+// TestConversions checks ToPhrase and FromPhrase for consistency and sanity.
+func TestConversions(t *testing.T) {
 	// Try for value {0}.
 	initial := []byte{0}
 	phrase, err := ToPhrase(initial, English)
@@ -188,6 +85,106 @@ func TestIntegrationConversions(t *testing.T) {
 	}
 	if bytes.Compare(initial, final) != 0 {
 		t.Error("failure for value {0, 0}")
+	}
+
+	// Try for value {1, 0}.
+	initial = []byte{1, 0}
+	phrase, err = ToPhrase(initial, English)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(phrase) != 1 {
+		t.Fatal("unexpected phrase length")
+	}
+	if phrase[0] != englishDictionary[257] {
+		t.Error("unexpected ToPhrase result")
+	}
+	final, err = FromPhrase(phrase, English)
+	if err != nil {
+		t.Error(err)
+	}
+	if bytes.Compare(initial, final) != 0 {
+		t.Error("failure for value {1, 0}")
+	}
+
+	// Try for value {0, 1}.
+	initial = []byte{0, 1}
+	phrase, err = ToPhrase(initial, English)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(phrase) != 1 {
+		t.Fatal("unexpected phrase length")
+	}
+	if phrase[0] != englishDictionary[512] {
+		t.Error("unexpected ToPhrase result")
+	}
+	final, err = FromPhrase(phrase, English)
+	if err != nil {
+		t.Error(err)
+	}
+	if bytes.Compare(initial, final) != 0 {
+		t.Error("failure for value {0, 1}")
+	}
+
+	// Try for value {1, 1}.
+	initial = []byte{1, 1}
+	phrase, err = ToPhrase(initial, English)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(phrase) != 1 {
+		t.Fatal("unexpected phrase length")
+	}
+	if phrase[0] != englishDictionary[513] {
+		t.Error("unexpected ToPhrase result")
+	}
+	final, err = FromPhrase(phrase, English)
+	if err != nil {
+		t.Error(err)
+	}
+	if bytes.Compare(initial, final) != 0 {
+		t.Error("failure for value {1, 1}")
+	}
+
+	// Try for value {2, 1}.
+	initial = []byte{2, 1}
+	phrase, err = ToPhrase(initial, English)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(phrase) != 1 {
+		t.Fatal("unexpected phrase length")
+	}
+	if phrase[0] != englishDictionary[514] {
+		t.Error("unexpected ToPhrase result")
+	}
+	final, err = FromPhrase(phrase, English)
+	if err != nil {
+		t.Error(err)
+	}
+	if bytes.Compare(initial, final) != 0 {
+		t.Error("failure for value {2, 1}")
+	}
+
+	// Try for value {2, 2}.
+	initial = []byte{2, 2}
+	phrase, err = ToPhrase(initial, English)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(phrase) != 1 {
+		t.Fatal("unexpected phrase length")
+	}
+	if phrase[0] != englishDictionary[770] {
+		t.Error("unexpected ToPhrase result")
+	}
+	final, err = FromPhrase(phrase, English)
+	if err != nil {
+		t.Error(err)
+	}
+	if bytes.Compare(initial, final) != 0 {
+		t.Error("failure for value {2, 2}")
 	}
 
 	// Try for value {abbey, abbey}.
@@ -337,9 +334,8 @@ func TestIntegrationConversions(t *testing.T) {
 	}
 }
 
-// TestIntegrationNilInputs tries nil and 0 inputs when using the exported
-// functions.
-func TestIntegrationNilInputs(t *testing.T) {
+// TestNilInputs tries nil and 0 inputs when using the exported functions.
+func TestNilInputs(t *testing.T) {
 	_, err := ToPhrase(nil, English)
 	if err != errEmptyInput {
 		t.Error(err)
@@ -371,9 +367,8 @@ func TestIntegrationNilInputs(t *testing.T) {
 	}
 }
 
-// TestIntegrationUnrecognizedWord tries to decode a phrase that has an
-// unrecognized word.
-func TestIntegrationUnrecognizedWord(t *testing.T) {
+// TestUnrecognizedWord tries to decode a phrase that has an unrecognized word.
+func TestUnrecognizedWord(t *testing.T) {
 	phrase := Phrase{"zzzzzz"}
 	_, err := FromPhrase(phrase, English)
 	if err != errUnknownWord {
@@ -381,16 +376,16 @@ func TestIntegrationUnrecognizedWord(t *testing.T) {
 	}
 }
 
-// TestIntegrationPhraseString calls String() on a Phrase.
-func TestIntegrationPhraseString(t *testing.T) {
+// TestPhraseString calls String() on a Phrase.
+func TestPhraseString(t *testing.T) {
 	phrase := Phrase{"abc", "def", "g"}
 	if phrase.String() != "abc def g" {
 		t.Error("Phrase.String() behaving unexpectedly")
 	}
 }
 
-// TestIntegrationNormalization tries to decode a non-normalized string.
-func TestIntegrationNormalization(t *testing.T) {
+// TestNormalization tries to decode a non-normalized string.
+func TestNormalization(t *testing.T) {
 	a := Phrase{"abhärten"}
 	b := Phrase{"abh\u00e4rten"}
 	c := Phrase{"abha\u0308rten"}
