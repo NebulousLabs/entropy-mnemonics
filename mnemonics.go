@@ -221,6 +221,13 @@ func FromPhrase(p Phrase, did DictionaryID) ([]byte, error) {
 	return intToBytes(intEntropy), nil
 }
 
+// FromString converts an input string into a phrase, and then calls
+// 'FromPhrase'.
+func FromString(str string, did DictionaryID) ([]byte, error) {
+	phrase := Phrase(strings.Split(str, " "))
+	return FromPhrase(phrase, did)
+}
+
 // String combines a phrase into a single string by concatenating the
 // individual words with space separation.
 func (p Phrase) String() string {
